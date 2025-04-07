@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coffeedoro - Cardápio & Pomodoro</title>
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css">
+  <!-- Google Fonts para um visual mais clássico -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-color: #573024;
+      --font-color-sub: #83432d;
+      --bg-color: #fdf5e6; /* tom de pergaminho */
+      --accent-color: #d4af37;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Open Sans', sans-serif;
+      background-color: #f0f0f0;
+    }
+
+    /* Container principal (ocupando toda a tela) */
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Container para os ícones de fundo flutuantes */
+    #bg-icons {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .bg-icon {
+      position: absolute;
+      opacity: 0.7;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% {
+        transform: rotate(var(--rotation)) translateY(0);
+      }
+      50% {
+        transform: rotate(var(--rotation)) translateY(-10px);
+      }
+      100% {
+        transform: rotate(var(--rotation)) translateY(0);
+      }
+    }
+
+    /* Estilo do cardápio */
+    main.cardapio {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-color);
+      padding: 40px 30px;
+      max-width: 800px;
+      width: 95%;
+      border: 2px solid var(--accent-color);
+      border-radius: 10px;
+      box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+      font-family: 'Playfair Display', serif;
+    }
+
+    main.cardapio .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    main.cardapio .header h1 {
+      font-size: 48px;
+      color: var(--font-color);
+      margin: 0;
+    }
+
+    main.cardapio .header p {
+      font-size: 20px;
+      color: var(--font-color-sub);
+      margin: 5px 0 0;
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    /* Seção do Pomodoro */
+    .pomodoro-section {
+      margin-bottom: 40px;
+    }
+
+    /* Reaproveita parte do estilo original do pomodoro */
+    .pomodoro-section #sessionType,
+    .pomodoro-section #sessionCount,
+    .pomodoro-section #timer {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 10px;
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    .pomodoro-section #sessionType {
+      font-weight: 600;
+      font-size: 28px;
+    }
+
+    .pomodoro-section #sessionCount {
+      font-size: 16px;
+      color: var(--font-color-sub);
+    }
+
+    .pomodoro-section #timer {
+      font-size: 60px;
+      margin: 10px 0;
+    }
+
+    .modes,
+    .controls {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .modes button,
+    .controls button {
+      flex: 1;
+      height: 40px;
+      border-radius: 5px;
+      border: 2px solid var(--accent-color);
+      background-color: var(--bg-color);
+      box-shadow: 4px 4px var(--accent-color);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--font-color);
+      cursor: pointer;
+      transition: transform 0.1s ease-in-out;
+    }
+
+    .modes button:active,
+    .controls button:active {
+      box-shadow: none;
+      transform: translate(2px, 2px);
+    }
+
+    .controls button {
+      border-radius: 20px;
+    }
+
+    /* Loader e elementos da cafeteira */
+    .loader {
+        width: 300px;
+        height: 150px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transform: scale(0.5);
+        position: relative;
+        margin: 0 auto 20px;
+      }
+  
+      .cafe {
+        width: 300px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+  
+      .coffee-header {
+        padding: 10px;
+        width: 100%;
+        height: 80px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ddcfcc;
+        border-radius: 10px;
+      }
+  
+      .coffee-header__buttons {
+        width: 25px;
+        height: 25px;
+        background-color: #282323;
+        border-radius: 50%;
+        box-shadow: 40px 0 0 0 #282323;
+      }
+  
+      .coffee-header__buttons::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        display: block;
+        transform: translate(100%, 25px);
+        background-color: #615e5e;
+        box-shadow: 40px 0 0 0 #615e5e;
+      }
+  
+      .coffee-header__display {
+        width: 50px;
+        height: 50px;
+        display: block;
+        border-radius: 50%;
+        background-color: #83432d;
+        border: 5px solid #573024;
+        box-sizing: border-box;
+      }
+  
+      .coffee-header__details {
+        width: 8px;
+        margin-left: 16px;
+        height: 20px;
+        align-self: flex-start;
+        background-color: #9b9091;
+        box-shadow: -12px 0 0 #9b9091, -24px 0 0 #9b9091;
+      }
+  
+      .coffee-medium {
+        width: 90%;
+        height: 160px;
+        position: relative;
+        background-color: #bcb0af;
+      }
+  
+      .coffee-medium:before {
+        content: "";
+        width: 90%;
+        height: 100px;
+        background-color: #776f6e;
+        position: absolute;
+        bottom: 0;
+        left: 5%;
+        border-radius: 20px 20px 0 0;
+      }
+  
+      .coffe-medium__exit {
+        width: 60px;
+        height: 20px;
+        position: absolute;
+        top: 0;
+        left: calc(50% - 30px);
+        background-color: #231f20;
+      }
+  
+      .coffe-medium__exit::before {
+        content: "";
+        width: 50px;
+        height: 20px;
+        border-radius: 0 0 50% 50%;
+        position: absolute;
+        bottom: -20px;
+        left: calc(50% - 25px);
+        background-color: #231f20;
+      }
+  
+      .coffe-medium__exit::after {
+        content: "";
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        bottom: -30px;
+        left: calc(50% - 5px);
+        background-color: #231f20;
+      }
+  
+      .coffee-medium__arm {
+        width: 70px;
+        height: 20px;
+        position: absolute;
+        top: 15px;
+        right: 25px;
+        background-color: #231f20;
+      }
+  
+      .coffee-medium__arm::before {
+        content: "";
+        width: 15px;
+        height: 5px;
+        position: absolute;
+        top: 7px;
+        left: -15px;
+        background-color: #9e9495;
+      }
+  
+      .coffee-medium__cup {
+        width: 80px;
+        height: 47px;
+        position: absolute;
+        bottom: 0;
+        left: calc(50% - 40px);
+        background-color: #fff;
+        border-radius: 0 0 70px 70px/0 0 110px 110px;
+      }
+  
+      .coffee-medium__cup::after {
+        content: "";
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        top: 6px;
+        right: -13px;
+        border: 5px solid #fff;
+        border-radius: 50%;
+      }
+  
+      .coffee-medium__liquid {
+        width: 6px;
+        height: 63px;
+        position: absolute;
+        top: 50px;
+        left: calc(50% - 3px);
+        background-color: transparent;
+        overflow: hidden;
+      }
+  
+      .coffee-medium__liquid::before {
+        transform: translateY(-100%);
+        content: "";
+        width: 100%;
+        height: 100%;
+        display: block;
+        background-color: #74372b;
+        animation: liquid 3500ms linear 0ms infinite normal both;
+      }
+  
+      .smoke {
+        opacity: 0;
+        width: 8px;
+        height: 20px;
+        position: absolute;
+        border-radius: 5px;
+        background-color: #b3aeae;
+      }
+  
+      .smoke.one {
+        bottom: 30px;
+        left: 102px;
+        animation: smoke 3s 5s linear infinite;
+      }
+  
+      .smoke.two {
+        bottom: 40px;
+        left: 118px;
+        animation: smoke 3s 4s linear infinite;
+      }
+  
+      .smoke.three {
+        bottom: 40px;
+        right: 118px;
+        animation: smoke 3s 7s linear infinite;
+      }
+  
+      .smoke.four {
+        bottom: 30px;
+        right: 102px;
+        animation: smoke 3s 6s linear infinite;
+      }
+  
+      .cafe::after {
+        content: "";
+        width: 95%;
+        height: 15px;
+        background-color: #573024;
+        box-shadow: 0 15px 0 5px #000;
+        border-radius: 10px;
+      }
+  
+      /* Desliga animações (caso as classes não estejam ativas) */
+      .loader:not(.coffee-on) .coffee-medium__liquid::before {
+        animation: none !important;
+        background-color: transparent;
+      }
+  
+      .loader:not(.on) .smoke {
+        animation: none !important;
+        opacity: 0 !important;
+      }
+  
+      @keyframes smoke {
+        0% {
+          transform: translateY(0px);
+          opacity: 0;
+        }
+        40% {
+          opacity: 0.5;
+        }
+        50% {
+          transform: translateY(-10px);
+          opacity: 0.3;
+        }
+        80% {
+          opacity: 0.5;
+        }
+        100% {
+          transform: translateY(-30px);
+          opacity: 0;
+        }
+      }
+  
+      @keyframes liquid {
+        10% {
+          transform: translateY(0);
+        }
+        90% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(100%);
+        }
+      }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Ícones de fundo flutuantes -->
+    <div id="bg-icons"></div>
+    <main class="cardapio" role="main">
+      <div class="header">
+        <h1>Coffeedoro ☕︎</h1>
+        <p>O café e pomodoro que despertam seus sentidos</p>
+      </div>
+      <div class="pomodoro-section">
+        <div id="sessionType">Preparando...</div>
+        <div id="sessionCount">Sessões completadas: 0</div>
+        <div class="loader">
+          <div class="cafe">
+            <div class="coffee-header">
+              <div class="coffee-header__buttons"></div>
+              <div class="coffee-header__display"></div>
+              <div class="coffee-header__details"></div>
+            </div>
+            <div class="coffee-medium">
+              <div class="coffe-medium__exit"></div>
+              <div class="coffee-medium__arm"></div>
+              <div class="coffee-medium__liquid"></div>
+              <div class="smoke one"></div>
+              <div class="smoke two"></div>
+              <div class="smoke three"></div>
+              <div class="smoke four"></div>
+              <div class="coffee-medium__cup"></div>
+            </div>
+          </div>
+        </div>
+        <div id="timer">25:00</div>
+        <div class="modes">
+          <button id="pomodoro">Coado</button>
+          <button id="shortBreak">Curto</button>
+          <button id="longBreak">Duplo</button>
+        </div>
+        <div class="controls">
+          <button id="toggle">Iniciar</button>
+          <button id="reset">Resetar</button>
+        </div>
+      </div>
+      <hr style="border: none; border-top: 1px dashed var(--accent-color); margin: 30px 0;">
+      <!-- Seção do cardápio com itens (opcional) -->
+      <div class="menu-items" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+        <div class="menu-item" style="background: rgba(255,255,255,0.9); padding: 15px; border: 1px solid var(--accent-color); border-radius: 8px; text-align: center;">
+          <img src="https://www.svgrepo.com/download/219914/coffee-cup.svg" alt="Café Coado" style="width: 60px; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 20px; color: var(--font-color);">Café Coado</h3>
+          <p style="margin: 5px 0 0; font-size: 18px; color: var(--font-color-sub);">R$ 5,00</p>
+        </div>
+        <div class="menu-item" style="background: rgba(255,255,255,0.9); padding: 15px; border: 1px solid var(--accent-color); border-radius: 8px; text-align: center;">
+          <img src="https://www.svgrepo.com/download/219919/coffee-grain-coffee.svg" alt="Café Curto" style="width: 60px; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 20px; color: var(--font-color);">Café Curto</h3>
+          <p style="margin: 5px 0 0; font-size: 18px; color: var(--font-color-sub);">R$ 4,50</p>
+        </div>
+        <div class="menu-item" style="background: rgba(255,255,255,0.9); padding: 15px; border: 1px solid var(--accent-color); border-radius: 8px; text-align: center;">
+          <img src="https://www.svgrepo.com/download/219924/tea-cup.svg" alt="Chá" style="width: 60px; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 20px; color: var(--font-color);">Chá</h3>
+          <p style="margin: 5px 0 0; font-size: 18px; color: var(--font-color-sub);">R$ 4,00</p>
+        </div>
+        <!-- Outros itens do cardápio podem ser adicionados aqui -->
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const durations = {
+      work: 25 * 60,
+      shortBreak: 5 * 60,
+      longBreak: 10 * 60
+    };
+
+    let currentMode = "work";
+    let remainingTime = durations[currentMode];
+    let timerInterval = null;
+    let sessionsCompleted = 0;
+    let isRunning = false;
+
+    const elements = {
+      sessionType: document.getElementById("sessionType"),
+      sessionCount: document.getElementById("sessionCount"),
+      timer: document.getElementById("timer"),
+      toggle: document.getElementById("toggle"),
+      reset: document.getElementById("reset"),
+      shortBreak: document.getElementById("shortBreak"),
+      longBreak: document.getElementById("longBreak"),
+      pomodoro: document.getElementById("pomodoro")
+    };
+
+    const formatTime = (secs) => {
+      const min = String(Math.floor(secs / 60)).padStart(2, '0');
+      const sec = String(secs % 60).padStart(2, '0');
+      return `${min}:${sec}`;
+    };
+
+    function updateDisplay() {
+      elements.timer.textContent = formatTime(remainingTime);
+      elements.sessionCount.textContent = `Sessões completadas: ${sessionsCompleted}`;
+      const labels = {
+        work: "Preparando café coado",
+        shortBreak: "Preparando café curto",
+        longBreak: "Preparando café duplo"
+      };
+      elements.sessionType.textContent = labels[currentMode];
+      elements.toggle.textContent = isRunning ? "Pausar" : "Iniciar";
+    }
+
+    function setMode(mode) {
+      stopTimer();
+      currentMode = mode;
+      remainingTime = durations[mode];
+      updateDisplay();
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        if (remainingTime > 0) {
+          remainingTime--;
+          updateDisplay();
+        } else {
+          stopTimer();
+          handleSessionCompletion();
+        }
+      }, 1000);
+      isRunning = true;
+      updateDisplay();
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      isRunning = false;
+      updateDisplay();
+    }
+
+    function toggleTimer() {
+      if (isRunning) {
+        stopTimer();
+        // Para a animação do café com transição suave
+        document.querySelector('.loader').classList.add('finish');
+        setTimeout(() => {
+          document.querySelector('.loader').classList.remove('coffee-on', 'finish');
+        }, 500);
+      } else {
+        document.querySelector('.loader').classList.add('on');
+        document.querySelector('.loader').classList.remove('finish');
+        setTimeout(() => {
+          document.querySelector('.loader').classList.add('coffee-on');
+        }, 1000);
+        startTimer();
+      }
+    }
+
+    function resetTimer() {
+      document.querySelector('.loader').classList.remove('on', 'coffee-on', 'finish');
+      stopTimer();
+      remainingTime = durations[currentMode];
+      updateDisplay();
+    }
+
+    function handleSessionCompletion() {
+      if (currentMode === "work") {
+        sessionsCompleted++;
+        setMode(sessionsCompleted % 4 === 0 ? "longBreak" : "shortBreak");
+      } else {
+        setMode("work");
+      }
+      startTimer();
+    }
+
+    elements.toggle.addEventListener("click", toggleTimer);
+    elements.reset.addEventListener("click", resetTimer);
+    elements.shortBreak.addEventListener("click", () => setMode("shortBreak"));
+    elements.longBreak.addEventListener("click", () => setMode("longBreak"));
+    elements.pomodoro.addEventListener("click", () => setMode("work"));
+
+    updateDisplay();
+
+    // Cria ícones de fundo aleatórios com efeito de flutuação
+    const bgIconsContainer = document.getElementById('bg-icons');
+    const iconUrls = [
+      'https://www.svgrepo.com/download/219915/cookies-biscuit.svg',
+      'https://www.svgrepo.com/download/219919/coffee-grain-coffee.svg',
+      'https://www.svgrepo.com/download/219916/muffin.svg',
+      'https://www.svgrepo.com/download/219914/coffee-cup.svg',
+      'https://www.svgrepo.com/download/219922/coffee-bag.svg',
+      'https://www.svgrepo.com/download/219928/coffee-cup-mug.svg',
+      'https://www.svgrepo.com/download/219918/frappe.svg',
+      'https://www.svgrepo.com/download/219908/piece-of-cake.svg',
+      'https://www.svgrepo.com/download/219906/coffee-cup-coffee.svg',
+      'https://www.svgrepo.com/download/219924/tea-cup.svg',
+      'https://www.svgrepo.com/download/219925/expresso.svg',
+      'https://www.svgrepo.com/download/219913/cake.svg'
+    ];
+    const numIcons = 250;
+
+    for (let i = 0; i < numIcons; i++) {
+      const img = document.createElement('img');
+      const randomIcon = iconUrls[Math.floor(Math.random() * iconUrls.length)];
+      img.src = randomIcon;
+      img.classList.add('bg-icon');
+      const size = Math.floor(Math.random() * 50) + 30; // tamanho entre 30px e 80px
+      img.style.width = size + 'px';
+      img.style.height = 'auto';
+      img.style.top = Math.random() * 100 + '%';
+      img.style.left = Math.random() * 100 + '%';
+      // Armazena a rotação como variável CSS para ser utilizada na animação
+      const angle = Math.random() * 90 - 45;
+      img.style.setProperty('--rotation', angle + 'deg');
+      // Define a rotação inicial
+      img.style.transform = 'rotate(var(--rotation))';
+      bgIconsContainer.appendChild(img);
+    }
+  </script>
+</body>
+
+</html>
